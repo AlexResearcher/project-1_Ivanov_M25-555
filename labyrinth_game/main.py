@@ -1,12 +1,33 @@
 #!/usr/bin/env python3
+from labyrinth_game.constants import COMMANDS
+from labyrinth_game.player_actions import (
+    get_input,
+    move_player,
+    show_inventory,
+    take_item,
+    use_item,
+)
+from labyrinth_game.utils import (
+    attempt_open_treasure,
+    describe_current_room,
+    show_help,
+    solve_puzzle,
+)
 
-from labyrinth_game.utils import describe_current_room, attempt_open_treasure, solve_puzzle
-from labyrinth_game.player_actions import get_input, take_item, move_player, show_inventory, use_item
 
 def process_command(game_state, command):
+        '''
+        Обработка команд игрока
+        '''
         parts = command.split(maxsplit=1)
         action = parts[0]
         arg = parts[1] if len(parts) > 1 else None
+
+        #обработка движений без go
+        directions = ["north", "south", "east", "west"]
+        if action in directions:
+            move_player(game_state, action)
+            return
 
         match action:
             case "look":
@@ -30,25 +51,27 @@ def process_command(game_state, command):
                     attempt_open_treasure(game_state)
                 else:
                     solve_puzzle(game_state)
+            case "help":
+                show_help(COMMANDS)
             case _:
                 print("Неизвестная команда.")
 
 def main():
     game_state = {
-        'player_inventory': [], # Инвентарь игрока
-        'current_room': 'entrance', # Текущая комната
-        'game_over': False, # Значения окончания игры
-        'steps_taken': 0 # Количество шагов
+        'player_inventory': [], #инвентарь игрока
+        'current_room': 'entrance', #текущая комната
+        'game_over': False, #значения окончания игры
+        'steps_taken': 0 #количество шагов
   }
-    # Приветственное сообщение
     print("Добро пожаловать в Лабиринт сокровищ!\n")
 
-    # Описание начальной комнаты
+    #описание комнаты
     describe_current_room(game_state)
 
-    # Основной игровой цикл
+    #игровой цикл
     while not game_state["game_over"]:
-        command = get_input("> ")  # Вызов нашей функции get_input()
+        #вызов функции get_input() для обработки ввода команд
+        command = get_input("> ")  
         if command == "quit":
             break
         process_command(game_state, command)
